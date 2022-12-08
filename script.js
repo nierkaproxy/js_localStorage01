@@ -11,7 +11,6 @@ const getButton = document.getElementById('find');
 
 const my_results = document.getElementById('findData');
 
-object = [];
 
 const insert = (e) => {
     e.preventDefault();
@@ -24,41 +23,94 @@ const insert = (e) => {
         alert('Product Quantity laukelis negali buti tuscias')
     }
 
-    cart = {
-        code: '',
-        name: '',
-        quantity: ''
+    const item = (() => {
+        const value = localStorage.getItem('cart');
+        return value === null
+            ? []
+            : JSON.parse(value);
+    })();
+
+const objects = [];
+
+    for(let i = 0; i < item.length; i++){
+        objects.push(item[i].productCode)
     }
-
-    cart.code = enterCode.value;
-    cart.name = enterName.value;
-    cart.quantity = enterQuantity.value;
-
-    object.push(cart);
-
-    console.log(object)
+    console.log(objects);
+    if(objects.includes(enterID.value)){
+        alert('Preke tokiu kodu yra');
+    } else{
+        item.push({
+            "productCode": enterCode.value,
+            "name": enterName.value,
+            "quantity": enterQuantity.value
+        });
+        localStorage.setItem('cart', JSON.stringify(item));
+    }
+    
+    console.log(JSON.parse(localStorage.getItem("cart")));
 
     enterCode.value = ''
     enterName.value = ''
     enterQuantity.value = ''
-    
-    localStorage.setItem('cart', JSON.stringify(object));
 }
 
 insertButton.addEventListener('click', insert);
 
 
-const remove = () => {
+const remove = (e) => {
+    e.preventDefault();
 
+    if(enterCode.value.length < 3){
+        alert('Product Code laukelyje turi buti bent 3 symboliai!')
+    }
+    const itemRemove = JSON.parse(localStorage.getItem('cart'));
+    console.log(itemRemove);
+    const index = itemRemove.findIndex(itemRemove => itemRemove.productCode === enterCode.value);
+
+    if(index > -1) {
+        itemRemove.splice(index, 1);
+    }
+    console.log(itemRemove);
+    localStorage.setItem('cart', JSON.stringify(itemRemove));
+
+    enterCode.value = ''
+    enterName.value = ''
+    enterQuantity.value = ''
 }
 
 removeButton.addEventListener('click', remove);
 
 
-const getData = () => {
+const getData = (e) => {
+    e.preventDefault();
 
+    if(findCode.value.length < 3){
+        alert('Product Code laukelyje turi buti bent 3 symboliai!')
+    }    
+
+    const findItem = JSON.parse(localStorage.getItem('cart'));
+
+    const list = document.createElement('li');
+
+    findItem.map(item => {
+        if(item.productCode === findCode.value){
+
+            const listName = document.createElement('li');
+            listName.textContent = "Product Name: " + item.name;
+
+            const listQuantity = document.createElement('li');
+            listQuantity.textContent = "Product quantity: " + item.quantity;
+
+            findData.appendChild(listName);
+            findData.appendChild(listQuantity);
+        } else {
+            list.textContent = "Product not found";
+        }
+    });
+    findData.appendChild(list);
+    
+    findCode.value = '';
 }
-
 
 getButton.addEventListener('click', getData);
 
